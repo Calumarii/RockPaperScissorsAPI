@@ -41,7 +41,7 @@ https://localhost:7195/api/games/37695ef7-6892-437f-8018-8423b987378b/join?name=
 
 `POST api/games/{id}/move`
 
-Choose a move using player name, game id and chosen move as query parameters. Accepted moves are "Rock", "Paper", or "Scissors", and are case sensitive. 
+Choose a move using player name, game id and chosen move as query parameters. Accepted moves are "Rock", "Paper", or "Scissors", and are not case-sensitive. 
 Example URL with GUID 37695ef7-6892-437f-8018-8423b987378b, name "player1", and move "Rock":
 
 https://localhost:7195/api/games/37695ef7-6892-437f-8018-8423b987378b/move?name=player1&move=Rock
