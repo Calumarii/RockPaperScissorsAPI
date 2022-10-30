@@ -15,7 +15,7 @@ The following rest calls can be made:
 
 	  GET /api/games/{id}
   
-A sucessful request returns Status Code 200 with following information in String format.
+A successful request returns Status Code 200 with following information in String format.
 
 ## Using the API
 ### New Game 
@@ -26,7 +26,7 @@ Post a player name as a query parameter. Example URL with name "player1":
 
 https://localhost:7195/api/games?name=player1
 
-Sucessful creation yeilds a GUID game id.
+Successful creation yields a GUID game id.
 
 ### Join game
 
@@ -41,7 +41,7 @@ https://localhost:7195/api/games/37695ef7-6892-437f-8018-8423b987378b/join?name=
 
 `POST api/games/{id}/move`
 
-Choose a move using player name, game id and chosen move as query parameters. Accepted moves are "Rock", "Paper", or "Scissors"; case sensitive. 
+Choose a move using player name, game id and chosen move as query parameters. Accepted moves are "Rock", "Paper", or "Scissors", and are case sensitive. 
 Example URL with GUID 37695ef7-6892-437f-8018-8423b987378b, name "player1", and move "Rock":
 
 https://localhost:7195/api/games/37695ef7-6892-437f-8018-8423b987378b/move?name=player1&move=Rock
