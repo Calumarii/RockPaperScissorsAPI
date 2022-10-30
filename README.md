@@ -35,7 +35,7 @@ Sucessful creation yeilds a GUID game id.
 
 `POST /api/games/{id}/join`
 
-Join a created game using the received game id and new player name in the request-body:
+Join a created game using the received game id, and new player name in the request-body. Names must be distinct, with 2 players only:
 
 {
 "id": "game id", 
