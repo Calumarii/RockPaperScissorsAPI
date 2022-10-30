@@ -5,6 +5,10 @@ using RockPaperScissorsAPI.Data;
 
 namespace RockPaperScissorsAPI.Controllers
 {
+    //TODO: Return JSON, not strings
+    //TODO: try-catch
+    //TODO: clean up repeating code
+
     [Route("api/games")]
     [ApiController]
     public class GameController : ControllerBase
@@ -16,6 +20,7 @@ namespace RockPaperScissorsAPI.Controllers
             _context = context;
         }
 
+        //Create a new game
         [HttpPost]
         [ProducesResponseType(200, Type = typeof(string))]
         [ProducesResponseType(400)]
@@ -37,12 +42,15 @@ namespace RockPaperScissorsAPI.Controllers
             return Ok("Game Id: " + guid);
         }
 
+        //Second player joining a created game
         [HttpPost("{id}/join")]
         [ProducesResponseType(200, Type = typeof(string))]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         public IActionResult Join(string name, System.Guid id)
         {
+            //TODO: Make it not possible to enter a non distict name
+
             var result = _context.Games.Find(id);
 
             if (result == null)
@@ -58,6 +66,7 @@ namespace RockPaperScissorsAPI.Controllers
             return (Ok("Game joined, make your move"));
         }
 
+        //Posting a move
         [HttpPost("{id}/move")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
@@ -68,7 +77,8 @@ namespace RockPaperScissorsAPI.Controllers
 
             if (result == null)
                 return NotFound("result == null");
-            
+
+            //TODO: make non-case sensitive
             if ((move == "Rock") || (move == "Paper") || (move == "Scissors"))
             {
 
@@ -95,6 +105,7 @@ namespace RockPaperScissorsAPI.Controllers
 
         }
 
+        //Checking/Showing results
         [HttpGet("{id}")]
         [ProducesResponseType(200, Type = typeof(string))]
         [ProducesResponseType(400)]
@@ -106,9 +117,11 @@ namespace RockPaperScissorsAPI.Controllers
             if (result == null)
                 return NotFound();
 
+            //TODO: Clean up repeated code into a method
+
             if (result.P1Move == null || result.P2Move == null)
             {
-                return new JsonResult(NotFound("Awaiting moves"));
+                return NotFound("Awaiting moves");
             }
             if (result.P1Move == result.P2Move)
             {
