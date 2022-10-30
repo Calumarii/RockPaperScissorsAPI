@@ -2,7 +2,7 @@
 
 Start the API directly from Visual Studio 2022.
 
-Testing can be carried out through Swagger, or through any program, such as Postman, that allows sending of HTTP-requests to access the API.
+Testing can be carried out through Swagger, or through any program, such as Postman (https://www.postman.com/), that allows sending of HTTP-requests to access the API.
 
 
 The following rest calls can be made:
