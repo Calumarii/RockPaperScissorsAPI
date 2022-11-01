@@ -2,6 +2,7 @@
 namespace RockPaperScissorsAPI.Models
 
 {
+    //Possible player moves, included "None" as to allow a "Null" value. Enums to reduce errors
     public enum MoveAction { None, Rock, Paper, Scissors}
     public class Game
     {

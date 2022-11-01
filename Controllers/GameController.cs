@@ -15,6 +15,9 @@ namespace RockPaperScissorsAPI.Controllers
     {
         private static List<Game> games = new List<Game>();
 
+        //Creates a new game of type Game and adds player 1's name, then adds the new game to the games list
+        //Returns a GUID as a string for the game ID
+
        /// <summary>
        /// Create a game
        /// </summary>
@@ -41,6 +44,8 @@ namespace RockPaperScissorsAPI.Controllers
             return String.Format("Game Id: {0}", guid);
         }
 
+        //Join a created game by providing a GUID as an ID, and providing a player 2 name to be added.
+
         /// <summary>
         /// Join a created game
         /// </summary>
@@ -55,7 +60,6 @@ namespace RockPaperScissorsAPI.Controllers
             if (!ModelState.IsValid)
                 return String.Format("Bad Request: {0}", ModelState);
 
-
             if (result == null)
                 return ("Game not found");
 
@@ -66,6 +70,9 @@ namespace RockPaperScissorsAPI.Controllers
 
             return ("Game joined, make your move");
         }
+
+        //Receives a chosen move, a created game's ID and one of the player's names.
+        //Checks entered player's name against stored player's name, and allocates chosen move.
 
         /// <summary>
         /// Mave a move
@@ -116,6 +123,9 @@ namespace RockPaperScissorsAPI.Controllers
             return ("Move accepted");
         }
 
+        //Looks up a game using the given GUID
+        //Displays results of the game appropriate to the given player
+
         /// <summary>
         /// Checking/Showing results
         /// </summary>
@@ -137,6 +147,9 @@ namespace RockPaperScissorsAPI.Controllers
             {
                 return ("Awaiting moves");
             }
+
+            //Using the enum integers, the moves can produce distinct results if subtracted.
+            //Therefore a switch statement seemed most appropriate to use 
 
             switch (result.P1Move - result.P2Move)
             {
