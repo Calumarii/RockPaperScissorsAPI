@@ -54,3 +54,9 @@ Returns a given game's outcome. If all move have not been made, returns Status c
 Example URL with GUID 37695ef7-6892-437f-8018-8423b987378b, and name "player2":
 
 https://localhost:7195/api/games/37695ef7-6892-437f-8018-8423b987378b?name=player2
+
+##Improvements to be made
+	
+Use JSON request body to input data.
+Create a model for Player with properties Name and Move, for a clearer and more focused structure.
+Create a resource file to hold the text that is shown to the user, making it possible to create different languages etc.

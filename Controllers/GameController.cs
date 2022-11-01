@@ -1,186 +1,177 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RockPaperScissorsAPI.Models;
-using RockPaperScissorsAPI.Data;
+using System.Globalization;
+using System.Collections;
+using System;
+using System.Security.Cryptography.X509Certificates;
 
 namespace RockPaperScissorsAPI.Controllers
 {
-    //TODO: Return JSON, not strings
-    //TODO: try-catch
-    //TODO: clean up repeating code
 
     [Route("api/games")]
     [ApiController]
     public class GameController : ControllerBase
     {
-        private readonly ApiContext _context;
+        private static List<Game> games = new List<Game>();
 
-        public GameController(ApiContext context)
-        {
-            _context = context;
-        }
-
-        //Create a new game
+       /// <summary>
+       /// Create a game
+       /// </summary>
+       /// <param name="name"></param>
+       /// <returns></returns>
         [HttpPost]
-        [ProducesResponseType(200, Type = typeof(string))]
-        [ProducesResponseType(400)]
-        public IActionResult NewGame(string name)
+        public string NewGame(string name)
         {
-            Game game = new Game();
-            
-            game.P1Name = name;
-            
-            _context.Games.Add(game);
-            
-            string guid = game.Id.ToString();
-            
+
+            Game newGame = new Game();
+
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+                return String.Format("Bad Request: {0}", ModelState);
 
-            _context.SaveChanges();
+            newGame.P1Name = name;
+            
+            games.Add(newGame);
 
-            return Ok("Game Id: " + guid);
+            newGame.Id = Guid.NewGuid();
+            
+            string guid = newGame.Id.ToString();
+            
+
+            return String.Format("Game Id: {0}", guid);
         }
 
-        //Second player joining a created game
+        /// <summary>
+        /// Join a created game
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpPost("{id}/join")]
-        [ProducesResponseType(200, Type = typeof(string))]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        public IActionResult Join(string name, System.Guid id)
+        public string Join(string name, System.Guid id)
         {
-            //TODO: Make it not possible to enter a non distict name
+            var result = games.Where(x => x.Id == id).FirstOrDefault();
 
-            var result = _context.Games.Find(id);
+            if (!ModelState.IsValid)
+                return String.Format("Bad Request: {0}", ModelState);
+
 
             if (result == null)
-                return (NotFound());
+                return ("Game not found");
+
+            if (result.P1Name == name)
+                return ("Name already taken");
 
             result.P2Name = name;
 
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            _context.SaveChanges();
-
-            return (Ok("Game joined, make your move"));
+            return ("Game joined, make your move");
         }
 
-        //Posting a move
+        /// <summary>
+        /// Mave a move
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="move">
+        /// The desired move. Options are as follows:
+        ///
+        ///     1 - Rock
+        ///     2 - Paper
+        ///     3 - Scissors
+        /// </param>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpPost("{id}/move")]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        public IActionResult Move(string name, string move, System.Guid id)
+        public string Move(string name, MoveAction move, System.Guid id)
         {
-            var result = _context.Games.Find(id);
+            var result = games.Where(x => x.Id == id).FirstOrDefault();
 
             if (result == null)
-                return NotFound("result == null");
-
-            //TODO: make non-case sensitive
-            if ((move == "Rock") || (move == "Paper") || (move == "Scissors"))
-            {
-
-                if (name == result.P1Name)
-                    result.P1Move = move;
-
-                else if (name == result.P2Name)
-                    result.P2Move = move;
-
-                else
-                    return NotFound("Player name not found");
-                
-            }
-            else            
-                return BadRequest("Move not recognised, check spelling");
-            
+                return ("Game not found");
 
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+                return String.Format("Bad Request: {0}", ModelState);
 
-            _context.SaveChanges();
+            if (move == MoveAction.None)
+            {
+                return ("Move not recognised");
+            }
+            if (name == result.P1Name)
+            {
 
-            return Ok("Move accepted");
+                result.P1Move = move;
+            }
 
+            else if (name == result.P2Name)
+            {
+
+                result.P2Move = move;
+            }
+
+            else
+            {
+                return ("Player name not found");
+
+            }
+
+            return ("Move accepted");
         }
 
-        //Checking/Showing results
+        /// <summary>
+        /// Checking/Showing results
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
         [HttpGet("{id}")]
-        [ProducesResponseType(200, Type = typeof(string))]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        public IActionResult Get(System.Guid id, string name)
+        public String Get(System.Guid id, string name)
         {
-            var result = _context.Games.Find(id);
+            var result = games.Where(x => x.Id == id).FirstOrDefault();
 
             if (result == null)
-                return NotFound();
+                return ("Game not found");
 
-            //TODO: Clean up repeated code into a method
+            if (!ModelState.IsValid)
+                return String.Format("Bad Request: {0}", ModelState);
 
-            if (result.P1Move == null || result.P2Move == null)
+            if (result.P1Move == MoveAction.None || result.P2Move == MoveAction.None)
             {
-                return NotFound("Awaiting moves");
-            }
-            if (result.P1Move == result.P2Move)
-            {
-                result.P1Outcome = "Draw";
-                result.P2Outcome = "Draw";
+                return ("Awaiting moves");
             }
 
-            if (result.P1Move == "Rock" && result.P2Move == "Paper")
+            switch (result.P1Move - result.P2Move)
             {
-                result.P2Outcome = "Winner";
-                result.P1Outcome = "Loser";
+                case -2: 
+                case 1:
+                    result.P1Outcome = "Winner";
+                    result.P2Outcome = "Loser";
+                    break;
+
+                case -1: 
+                case 2:
+                    result.P1Outcome = "Loser";
+                    result.P2Outcome = "Winner";
+                    break;
+
+                    default:
+                    result.P1Outcome = "Draw";
+                    result.P2Outcome = "Draw"; 
+                    break;
             }
 
-            if (result.P1Move == "Rock" && result.P2Move == "Scissors")
-            {
-                result.P2Outcome = "Loser";
-                result.P1Outcome = "Winner";
-            }
-
-            if (result.P1Move == "Paper" && result.P2Move == "Rock")
-            {
-                result.P2Outcome = "Loser";
-                result.P1Outcome = "Winner";
-            }
-
-            if (result.P1Move == "Paper" && result.P2Move == "Scissors")
-            {
-                result.P2Outcome = "Winner";
-                result.P1Outcome = "Loser";
-            }
-
-            if (result.P1Move == "Scissors" && result.P2Move == "Rock")
-            {
-                result.P2Outcome = "Winner";
-                result.P1Outcome = "Loser";
-            }
-
-            if (result.P1Move == "Scissors" && result.P2Move == "Paper")
-            {
-                result.P2Outcome = "Loser";
-                result.P1Outcome = "Winner";
-            }
-
-            string finalResultP1 = result.P1Outcome + "! Your move: " + result.P1Move + ", " + result.P2Name + "'s move: " + result.P2Move;
-            string finalResultP2 = result.P2Outcome + "! Your move: " + result.P2Move + ", " + result.P1Name + "'s move: " + result.P1Move;
+            string finalResultP1 = String.Format("{0}! Your move: {1}, {2}'s move: {3}", result.P1Outcome, result.P1Move, result.P2Name, result.P2Move);
+            string finalResultP2 = String.Format("{0}! Your move: {1}, {2}'s move: {3}", result.P2Outcome, result.P2Move, result.P1Name, result.P1Move);
 
             if (name == result.P1Name)
             {
-                return Ok(finalResultP1);
+                return (finalResultP1);
             }
             if (name == result.P2Name)
             {
-                return Ok(finalResultP2);
+                return (finalResultP2);
             }
 
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            return NotFound();
+            return ("Game not found");
         }
+
     }
 }
